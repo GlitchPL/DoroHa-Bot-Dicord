@@ -1,9 +1,13 @@
-
 {
   "name": "DoroHa",
-  "version": "1.0.0",
   "description": "RS",
+  "version": "1.0.0",
   "main": "bot.js",
-  "author": "GlitchPL",
-  "dependencies": {}
+  "scripts": {
+    "start": "node bot.js"
+  },
+  "dependencies": {
+    "discord.js": "11.1.0",
+    "request": "2.81.0"
+  }
 }
