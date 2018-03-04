@@ -8,7 +8,7 @@ logger.add(logger.transports.Console, {
 });
 logger.level = 'debug';
 // Initialize Discord Bot
-var bot = new Discord.Client({
+var bot = new 419974039952687115({
    token: NDE5OTc0MDM5OTUyNjg3MTE1.DX4Eag.BKYuwHugPcNMSuMAnsCNF6nz1Ys,
    autorun: true
 });
