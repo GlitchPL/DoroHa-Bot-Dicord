@@ -1,0 +1,101 @@
+apply plugin: 'java'
+apply plugin: 'idea'
+apply plugin: 'distribution'
+apply plugin: 'spring-boot'
+
+version = '1.4.11'
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+buildscript {
+    ext {
+        springBootVersion = '1.3.3.RELEASE'
+    }
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
+        classpath("org.springframework.boot:spring-boot-starter-web:${springBootVersion}")
+        classpath("org.springframework.boot:spring-boot-starter-jersey:${springBootVersion}")
+    }
+}
+
+repositories {
+    repositories {
+        jcenter()
+        mavenCentral()
+    }
+}
+
+dependencies {
+    compile 'net.dv8tion:JDA:2.2.1_353'
+    compile 'net.dv8tion:jda-player:0.2.3_25'
+    compile 'commons-io:commons-io:2.4'
+
+    compile 'org.springframework.boot:spring-boot-starter-web'
+    compile 'org.springframework.boot:spring-boot-starter-jersey'
+    
+    compile("org.springframework.boot:spring-boot-starter-data-jpa")
+    compile("com.h2database:h2")
+
+    compile "io.springfox:springfox-swagger2:2.4.0"
+    compile 'io.springfox:springfox-swagger-ui:2.4.0'
+
+    testCompile 'org.springframework.boot:spring-boot-starter-test' 
+}
+
+processResources {
+    exclude 'app.properties'
+}
+
+jar {
+    group = 'build'
+    manifest {
+        attributes 'Main-Class': 'net.dirtydeeds.discordsoundboard.MainController',
+        'Implementation-Version': version
+    }
+    from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
+    jar.into('static') {
+        from('src/main/webapp')
+    }
+    exclude('/src/main/java/**')
+    exclude("/src/main/resources/*")
+}
+
+def distributionsCopySpec = copySpec {
+    def baseName = "${jar.baseName}"
+    def fileName = "${baseName}-$version"
+    from file("$buildDir/libs")
+    from file("$buildDir/resources/main")
+    include "**/app.properties.example"
+    from file("/distFiles")
+    include "soundboard.bat"
+    include "ffmpeg.exe"
+    include "ffprobe.exe"
+    include "youtube-dl"
+    include "avatar.jpg"
+    include "${fileName}.jar"
+    exclude 'app.properties'
+    rename ("app.properties.example", "app.properties")
+    rename "${fileName}.jar", "${baseName}.jar"
+}
+
+task zip(type: Zip, dependsOn: 'bootRepackage') {
+    def fileName = "${baseName}-$version"
+    with distributionsCopySpec
+    archiveName "${fileName}.zip"
+}
+task tar(type: Tar, dependsOn: 'bootRepackage') {
+    def fileName = "${baseName}-$version"
+    with distributionsCopySpec
+    archiveName "${fileName}.tar"
+}
+
+build.dependsOn(zip,tar)
+
+task wrapper(type: Wrapper) {
+    gradleVersion = '2.3'
+}
+
